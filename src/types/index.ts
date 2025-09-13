@@ -1,3 +1,5 @@
+import { IEvents } from "../components/base/events";
+
 export interface IProduct {
   id: string;
   title: string;
@@ -28,9 +30,9 @@ export type TOrderContactsInfo = Pick<IOrder, 'email' | 'phone'>;
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 export interface ILarekApi {
-  getProductList: () => Promise<IProduct[]>;
-  getProduct: (id: string) => Promise<IProduct>;
-  createOrder: (order: IOrder) => Promise<IOrderResult>;
+    getProductList: () => Promise<IProduct[]>;
+    getProduct: (id: string) => Promise<IProduct>;
+    createOrder: (order: IOrder) => Promise<IOrderResult>;
 }
 
 export interface IProductData {
@@ -68,12 +70,6 @@ export interface IComponent<T> {
   render: (data?: Partial<T>) => HTMLElement;
 }
 
-export interface IEvents {
-  on: <T>(event: string, callback: (data: T) => void) => void;
-  emit: <T>(event: string, data?: T) => void;
-  trigger: <T>(event: string, data?: T) => () => void;
-}
-
 export interface IModal {
   open: () => void;
   close: () => void;
@@ -90,6 +86,7 @@ export interface IBasket {
   basketList: HTMLElement;
   total: HTMLElement;
   orderButton: HTMLButtonElement;
+  items: TBasketItem[];
   render: (items: TBasketItem[]) => void;
   updateTotal: (total: number) => void;
 }
@@ -127,9 +124,20 @@ export interface IProductPreview extends IProductCard {
 }
 
 export interface ISuccessOrder {
-  total: number;
-  render: (data: IOrderResult) => void;
+    id: string;
+    total: number;
 }
+
+export interface ILarekApi {
+  getProductList: () => Promise<IProduct[]>;
+  getProduct: (id: string) => Promise<IProduct>;
+  createOrder: (order: IOrder) => Promise<IOrderResult>;
+}
+
+export type ApiListResponse<Type> = {
+    total: number;
+    items: Type[];
+};
 
 export enum AppEvents {
   PRODUCTS_CHANGED = 'productList:changed',
@@ -153,7 +161,9 @@ export enum AppEvents {
   ORDER_PAYMENT_CHANGE = 'order.payment:change',
   ORDER_ADDRESS_CHANGE = 'order.address:change',
   CONTACTS_EMAIL_CHANGE = 'contacts.email:change',
-  CONTACTS_PHONE_CHANGE = 'contacts.phone:change'
+  CONTACTS_PHONE_CHANGE = 'contacts.phone:change',
+  ORDER_VALIDITY_CHANGED = 'order:validityChanged',
+  CONTACTS_VALIDITY_CHANGED = 'contacts:validityChanged',
 }
 
 export interface EventDataProductOpen {
