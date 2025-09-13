@@ -6,7 +6,7 @@ import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Product } from './components/common/Product';
 import './scss/styles.scss';
-import { ILarekApi, IOrder, IOrderResult, IProduct, TBasketItem, TOrderContactsInfo, TOrderPaymentInfo } from './types';
+import { FormErrors, ILarekApi, IOrder, IOrderResult, IProduct, TBasketItem, TOrderContactsInfo, TOrderPaymentInfo } from './types';
 import { API_URL, settings } from './utils/constants';
 import { AppEvents } from './types';
 import { Basket } from './components/common/Basket';
@@ -33,6 +33,18 @@ let basket: Basket;
 // Инициализация API
 const api: ILarekApi = new LarekApi(API_URL, settings);
 
+events.on(AppEvents.FORM_ERRORS_CHANGED, (errors: FormErrors) => {
+    const modalContent = modal.getContent();
+    if (!modalContent) return;
+    const errorElement = modalContent.querySelector('.form__errors') as HTMLElement;
+    if (!errorElement) return;
+    const errorMessages = Object.values(errors)
+        .filter(msg => msg && msg.trim() !== '')
+        .join(', ');
+    errorElement.textContent = errorMessages;
+    errorElement.style.display = errorMessages ? 'block' : 'none';
+});
+
 // Обработчик открытия детального просмотра товара
 events.on(AppEvents.PRODUCT_OPEN, (product: IProduct) => {
     const template = document.getElementById('card-preview') as HTMLTemplateElement;
@@ -52,7 +64,7 @@ events.on(AppEvents.BASKET_OPEN, () => {
     const basketContainer = basketTemplate.content.cloneNode(true) as DocumentFragment;
     const basketElement = basketContainer.firstElementChild as HTMLElement;
     
-    const basket = new Basket(basketElement, events);
+    basket = new Basket(basketElement, events);
     
     const basketItems = orderData.basket;
     const total = orderData.getTotal();
@@ -68,9 +80,13 @@ events.on(AppEvents.BASKET_OPEN, () => {
 events.on(AppEvents.BASKET_CHANGED, (items: TBasketItem[]) => {
     page.updateBasketCounter(items.length);
     
-    if (basket) {
+    if (basket && modal.isOpen()) {
         basket.renderBasket(items);
         basket.updateTotal(orderData.getTotal());
+        
+        if (items.length === 0) {
+            modal.close();
+        }
     }
 });
 
@@ -128,7 +144,10 @@ events.on(AppEvents.BASKET_SUBMIT, () => {
             });
             
             events.on('order:submit', () => {
-                if (orderData.validateOrder()) {
+                if (!orderData.validateOrder()){
+                    events.emit(AppEvents.FORM_ERRORS_CHANGED, orderData.formErrors);
+                }
+                else {
                     const contactsTemplate = document.getElementById('contacts') as HTMLTemplateElement;
                     if (contactsTemplate) {
                         const contactsFormElement = contactsTemplate.content.cloneNode(true) as DocumentFragment;
@@ -154,6 +173,8 @@ events.on(AppEvents.BASKET_SUBMIT, () => {
                             
                             events.on('contacts:submit', () => {
                                 if (orderData.validateContacts()) {
+                                    events.emit(AppEvents.FORM_ERRORS_CHANGED, orderData.formErrors);
+                                } else {
                                     const total = orderData.getTotal();
                                     const items = orderData.basket.map(item => item.id);
                                     

@@ -31,10 +31,18 @@ export class Modal implements IModal {
         this.events.emit(AppEvents.MODAL_CLOSE);
     }
 
+    getContent() {
+        return this._content;
+    }
+
     setContent(content: HTMLElement): void {
         this._content.innerHTML = '';
         this._content.appendChild(content);
     }
+
+    isOpen(): boolean {
+    return this._modal.classList.contains('modal_active');
+    }  
 
     private handleEscape(evt: KeyboardEvent): void {
         if (evt.key === 'Escape') {
