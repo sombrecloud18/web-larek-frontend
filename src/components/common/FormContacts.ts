@@ -20,8 +20,17 @@ export class FormContacts extends Form<{email: string, phone: string}> {
         this._emailInput.addEventListener('input', () => {
             this.onInputChange('email', this._emailInput.value);
         });
+    }
 
-        
+    setSubmitButtonState(isValid: boolean): void {
+        const submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (submitButton) {
+            submitButton.disabled = !isValid;
+        }
+    }
+
+    isActive(): boolean {
+        return this.container.isConnected && this.container.offsetParent !== null;
     }
 
     setValues(email: string, phone: string): void {
@@ -34,4 +43,5 @@ export class FormContacts extends Form<{email: string, phone: string}> {
     clear(): void {
         this.container.reset();
     }
+    
 }

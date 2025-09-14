@@ -3,6 +3,7 @@ import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/components";
 import { IEvents } from "../base/events";
 import { AppEvents } from "../../types";
+import { BasketItem } from "./BasketItem";
 
 export class Basket extends Component<IBasket>{
     protected _basketList: HTMLElement;
@@ -35,31 +36,22 @@ export class Basket extends Component<IBasket>{
     }
     renderBasket(items: TBasketItem[]) {
         this._basketList.innerHTML = '';
-        
         items.forEach((item, index) => {
             const template = document.getElementById('card-basket') as HTMLTemplateElement;
             if (template) {
-                const basketItem = template.content.cloneNode(true) as DocumentFragment;
+                const basketItemElement = template.content.cloneNode(true) as DocumentFragment;
+                const basketItemContainer = basketItemElement.firstElementChild as HTMLElement;
                 
-                const indexEl = basketItem.querySelector('.basket__item-index');
-                const titleEl = basketItem.querySelector('.card__title');
-                const priceEl = basketItem.querySelector('.card__price');
-                const deleteBtn = basketItem.querySelector('.basket__item-delete');
-
-                if (indexEl) indexEl.textContent = String(index + 1);
-                if (titleEl) titleEl.textContent = item.title;
-                if (priceEl) priceEl.textContent = `${item.price} синапсов`;
+                const basketItem = new BasketItem(basketItemContainer, this.events);
+                basketItem.render({...item, index});
                 
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.events.emit(AppEvents.PRODUCT_REMOVE, item.id);
-                    });
-                }
-
-                this._basketList.appendChild(basketItem);
+                this._basketList.appendChild(basketItemContainer);
             }
         });
+    }
+
+    get containerElement(): HTMLElement {
+        return this.container;
     }
 
     updateTotal(total: number): void {

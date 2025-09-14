@@ -154,6 +154,8 @@ export enum AppEvents {
   PRODUCT_OPEN = 'product:open',
   PRODUCT_ADD = 'product:addBasket',
   PRODUCT_REMOVE = 'product:removeBasket',
+  PRODUCT_REMOVE_FROM_PREVIEW = 'product:removeFromPreview',
+  PRODUCTS_LOADED = 'products:loaded',
   BASKET_SUBMIT = 'basket:submit',
   ORDER_SUBMIT = 'order:submit',
   CONTACTS_SUBMIT = 'contacts:submit',
@@ -164,6 +166,7 @@ export enum AppEvents {
   CONTACTS_PHONE_CHANGE = 'contacts.phone:change',
   ORDER_VALIDITY_CHANGED = 'order:validityChanged',
   CONTACTS_VALIDITY_CHANGED = 'contacts:validityChanged',
+  SUCCESS_SUBMIT = 'success:close',
 }
 
 export interface EventDataProductOpen {

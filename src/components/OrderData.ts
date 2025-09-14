@@ -21,6 +21,9 @@ export class OrderData implements IOrderData {
     }
 
     addProduct(item: TBasketItem): void {
+        if (item.price === null || item.price === undefined || item.price <= 0) {
+            throw new Error('Нельзя добавить товар без цены в корзину');
+        }
         if (!this.basket.find(product => product.id === item.id)) {
             this.basket.push(item);
             this.events.emit(AppEvents.BASKET_CHANGED, this.basket);
@@ -66,7 +69,7 @@ export class OrderData implements IOrderData {
         this.events.emit(AppEvents.BASKET_CHANGED, this.basket);
     }
 
-     setOrderField(field: keyof TOrderPaymentInfo, value: string): void {
+    setOrderField(field: keyof TOrderPaymentInfo, value: string): void {
         this.order[field] = value;
         this.validateOrder();
         this.events.emit(AppEvents.ORDER_VALIDITY_CHANGED, this._orderValid);
@@ -106,5 +109,9 @@ export class OrderData implements IOrderData {
 
     get isContactsFormValid(): boolean {
         return this._contactsValid;
+    }
+
+    isProductInBasket(productId: string): boolean {
+        return this.basket.some(item => item.id === productId);
     }
 }

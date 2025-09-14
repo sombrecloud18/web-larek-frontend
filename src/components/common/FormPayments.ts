@@ -39,6 +39,17 @@ export class FormPayments extends Form<{payment: string, address: string}> {
         }
     }
 
+    setSubmitButtonState(isValid: boolean): void {
+        const submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (submitButton) {
+            submitButton.disabled = !isValid;
+        }
+    }
+
+    isActive(): boolean {
+        return this.container.isConnected && this.container.offsetParent !== null;
+    }
+
     setValues(payment: string, address: string): void {
         if (payment) {
             this.selectPayment(payment);

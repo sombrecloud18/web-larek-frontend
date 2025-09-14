@@ -1,4 +1,4 @@
-import { IForm } from "../../types"
+import { FormErrors, IForm } from "../../types"
 import { IEvents } from "../base/events";
 import { ensureElement } from "../../utils/utils"
 import { Component } from "../base/components"
@@ -26,7 +26,18 @@ export class Form<T> extends Component<IForm> {
             e.preventDefault();
             this.events.emit(`${this.container.name}:submit`);
         });
+        
     }
+
+    showErrors(errors: FormErrors): void {
+        const errorMessages = Object.values(errors)
+            .filter(msg => msg && msg.trim() !== '')
+            .join(', ');
+        
+        this.errors.textContent = errorMessages;
+        this.errors.style.display = errorMessages ? 'block' : 'none';
+    }
+
 
     protected onInputChange(field: keyof T, value: string) {
         this.events.emit(`${this.container.name}.${String(field)}:change`, {
