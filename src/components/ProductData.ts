@@ -1,4 +1,4 @@
-import { IProduct, IProductData } from "../types";
+import { AppEvents, IProduct, IProductData } from "../types";
 import { IEvents } from "./base/events";
 
 export class ProductData implements IProductData {
@@ -15,6 +15,7 @@ export class ProductData implements IProductData {
 
     setProductList(productsData: IProduct[]) {
         this.productList = productsData;
+        this.events.emit(AppEvents.PRODUCTS_CHANGED, this.productList);
         return this.productList;
     }
 

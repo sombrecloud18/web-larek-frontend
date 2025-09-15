@@ -5,6 +5,7 @@ import { Form } from "./Form";
 export class FormContacts extends Form<{email: string, phone: string}> {
     protected _phoneInput: HTMLInputElement;
     protected _emailInput: HTMLInputElement;
+    protected _submitButton: HTMLButtonElement;
 
     constructor(container: HTMLFormElement, events: IEvents) {
         super(container, events);
@@ -12,6 +13,7 @@ export class FormContacts extends Form<{email: string, phone: string}> {
         
         this._phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
         this._emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
+        this._submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement; 
         
         this._phoneInput.addEventListener('input', () => {
             this.onInputChange('phone', this._phoneInput.value);
@@ -23,15 +25,15 @@ export class FormContacts extends Form<{email: string, phone: string}> {
     }
 
     setSubmitButtonState(isValid: boolean): void {
-        const submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement;
-        if (submitButton) {
-            submitButton.disabled = !isValid;
+        if (this._submitButton) {
+           this._submitButton.disabled = !isValid;
         }
     }
-
+    
     isActive(): boolean {
         return this.container.isConnected && this.container.offsetParent !== null;
     }
+
 
     setValues(email: string, phone: string): void {
         this._emailInput.value = email;

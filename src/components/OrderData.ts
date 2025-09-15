@@ -3,13 +3,13 @@ import { IEvents } from "./base/events";
 
 export class OrderData implements IOrderData {
     basket: TBasketItem[] = [];
-    order: IOrder = {
+    paymentInfo: TOrderPaymentInfo = {
         payment: '',
-        address: '',
+        address: ''
+    };
+    contactsInfo: TOrderContactsInfo = {
         email: '',
-        phone: '',
-        total: 0,
-        items: [],
+        phone: ''
     };
     formErrors: FormErrors = {};
     events: IEvents;
@@ -52,15 +52,17 @@ export class OrderData implements IOrderData {
     }
 
     clearDataForms(): void {
-        this.order = {
+        this.paymentInfo = {
             payment: '',
-            address: '',
+            address: ''
+        };
+        this.contactsInfo = {
             email: '',
-            phone: '',
-            total: 0,
-            items: [],
+            phone: ''
         };
         this.formErrors = {};
+        this._orderValid = false;
+        this._contactsValid = false;
     }
 
     clearBasket(): void {
@@ -70,21 +72,21 @@ export class OrderData implements IOrderData {
     }
 
     setOrderField(field: keyof TOrderPaymentInfo, value: string): void {
-        this.order[field] = value;
+        this.paymentInfo[field] = value;
         this.validateOrder();
         this.events.emit(AppEvents.ORDER_VALIDITY_CHANGED, this._orderValid);
     }
 
     setContactsField(field: keyof TOrderContactsInfo, value: string): void {
-        this.order[field] = value;
+        this.contactsInfo[field] = value;
         this.validateContacts();
         this.events.emit(AppEvents.CONTACTS_VALIDITY_CHANGED, this._contactsValid);
     }
 
     validateOrder(): boolean {
         const errors: FormErrors = {};
-        if (!this.order.payment) errors.payment = 'Выберите способ оплаты';
-        if (!this.order.address.trim()) errors.address = 'Введите адрес доставки';
+        if (!this.paymentInfo.payment) errors.payment = 'Выберите способ оплаты';
+        if (!this.paymentInfo.address.trim()) errors.address = 'Введите адрес доставки';
         
         this.formErrors = errors;
         this._orderValid = Object.keys(errors).length === 0;
@@ -94,8 +96,8 @@ export class OrderData implements IOrderData {
 
     validateContacts(): boolean {
         const errors: FormErrors = {};
-        if (!this.order.email.trim()) errors.email = 'Введите email';
-        if (!this.order.phone.trim()) errors.phone = 'Введите телефон';
+        if (!this.contactsInfo.email.trim()) errors.email = 'Введите email';
+        if (!this.contactsInfo.phone.trim()) errors.phone = 'Введите телефон';
         
         this.formErrors = errors;
         this._contactsValid = Object.keys(errors).length === 0;
@@ -113,5 +115,16 @@ export class OrderData implements IOrderData {
 
     isProductInBasket(productId: string): boolean {
         return this.basket.some(item => item.id === productId);
+    }
+
+    createOrderObject(): IOrder {
+        return {
+            payment: this.paymentInfo.payment,
+            address: this.paymentInfo.address,
+            email: this.contactsInfo.email,
+            phone: this.contactsInfo.phone,
+            total: this.getTotal(),
+            items: this.basket.map(item => item.id)
+        };
     }
 }

@@ -5,6 +5,7 @@ import { Form } from "./Form";
 export class FormPayments extends Form<{payment: string, address: string}> {
     protected _addressInput: HTMLInputElement;
     protected _paymentButtons: NodeListOf<HTMLButtonElement>;
+    protected _submitButton: HTMLButtonElement;
     protected _selectedPayment = '';
 
     constructor(container: HTMLFormElement, events: IEvents) {
@@ -13,6 +14,7 @@ export class FormPayments extends Form<{payment: string, address: string}> {
         
         this._addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
         this._paymentButtons = this.container.querySelectorAll('button[name="card"], button[name="cash"]');
+        this._submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement;
         
         this._addressInput.addEventListener('input', () => {
             this.onInputChange('address', this._addressInput.value);
@@ -39,10 +41,10 @@ export class FormPayments extends Form<{payment: string, address: string}> {
         }
     }
 
+    
     setSubmitButtonState(isValid: boolean): void {
-        const submitButton = this.container.querySelector('button[type="submit"]') as HTMLButtonElement;
-        if (submitButton) {
-            submitButton.disabled = !isValid;
+        if (this._submitButton) {
+            this._submitButton.disabled = !isValid;
         }
     }
 

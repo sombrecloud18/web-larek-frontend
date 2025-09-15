@@ -1,5 +1,5 @@
 import { ensureElement } from "../../utils/utils";
-import { ISuccessOrder } from "../../types";
+import { AppEvents, ISuccessOrder } from "../../types";
 import { Component } from "../base/components";
 import { IEvents } from "../base/events";
 
@@ -16,12 +16,16 @@ export class SuccessOrder extends Component<ISuccessOrder> {
         this._closeButton = ensureElement<HTMLButtonElement>('.order-success__close', container);
         
         this._closeButton.addEventListener('click', () => {
-            this.events.emit('success:close');
+            this.events.emit(AppEvents.SUCCESS_CLOSE);
         });
     }
 
     set total(value: number) {
         this._totalElement.textContent = `Списано ${value} синапсов`;
+    }
+
+    getContainer(): HTMLElement {
+        return this.container;
     }
 
     render(data: ISuccessOrder): HTMLElement {

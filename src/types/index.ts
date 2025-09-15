@@ -45,7 +45,8 @@ export interface IProductData {
 
 export interface IOrderData {
   basket: TBasketItem[];
-  order: IOrder;
+  paymentInfo: TOrderPaymentInfo;
+  contactsInfo: TOrderContactsInfo;
   formErrors: FormErrors;
   events: IEvents;
   addProduct: (item: TBasketItem) => void;
@@ -155,7 +156,6 @@ export enum AppEvents {
   PRODUCT_ADD = 'product:addBasket',
   PRODUCT_REMOVE = 'product:removeBasket',
   PRODUCT_REMOVE_FROM_PREVIEW = 'product:removeFromPreview',
-  PRODUCTS_LOADED = 'products:loaded',
   BASKET_SUBMIT = 'basket:submit',
   ORDER_SUBMIT = 'order:submit',
   CONTACTS_SUBMIT = 'contacts:submit',
@@ -166,7 +166,8 @@ export enum AppEvents {
   CONTACTS_PHONE_CHANGE = 'contacts.phone:change',
   ORDER_VALIDITY_CHANGED = 'order:validityChanged',
   CONTACTS_VALIDITY_CHANGED = 'contacts:validityChanged',
-  SUCCESS_SUBMIT = 'success:close',
+  ORDER_SUCCESS = 'order:success',
+  SUCCESS_CLOSE = 'success:close',
 }
 
 export interface EventDataProductOpen {

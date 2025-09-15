@@ -39,6 +39,11 @@ export class ProductPreview extends Component<IProduct> {
             this.events.emit(AppEvents.PRODUCT_OPEN, data);
         });
 
+        const hasPrice = data.price !== null && data.price !== undefined && data.price > 0;
+        if (!hasPrice) {
+            this._price.textContent = 'Бесценно';
+        }
+
         return this.container;
     }
 
