@@ -6,7 +6,7 @@ import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Product } from './components/common/Product';
 import './scss/styles.scss';
-import { FormErrors, ILarekApi, IOrder, IOrderResult, IProduct, TBasketItem, TOrderContactsInfo, TOrderPaymentInfo } from './types';
+import { FormErrors, ILarekApi, IOrderResult, IProduct, TBasketItem, TOrderContactsInfo, TOrderPaymentInfo } from './types';
 import { API_URL, settings } from './utils/constants';
 import { AppEvents } from './types';
 import { Basket } from './components/common/Basket';
@@ -35,23 +35,19 @@ const basketElement = basketContainer.firstElementChild as HTMLElement;
 const basket = new Basket(basketElement, events);
 basket.setOrderButtonState(orderData.basket.length > 0);
 
-// Инициализация статичных элементов окна успешной покупки
-const successTemplate = document.getElementById('success') as HTMLTemplateElement;
-const successElement = successTemplate.content.cloneNode(true) as DocumentFragment;
-const successContent = successElement.firstElementChild as HTMLElement;
-
 // Инициализация форм (создаются один раз)
-let paymentForm: FormPayments | null = null;
-let contactsForm: FormContacts | null = null;
-let successOrder: SuccessOrder | null = null;
-
-const contactsTemplate = document.getElementById('contacts') as HTMLTemplateElement;
-const contactsFormElement = contactsTemplate.content.cloneNode(true) as DocumentFragment;
-const contactsFormElementQuery = contactsFormElement.querySelector('form') as HTMLFormElement;
-
-const orderTemplate = document.getElementById('order') as HTMLTemplateElement;
-const orderFormElement = orderTemplate.content.cloneNode(true) as DocumentFragment;
-const formElement = orderFormElement.querySelector('form') as HTMLFormElement;
+const paymentForm = new FormPayments(
+    document.getElementById('order') as HTMLTemplateElement,
+    events
+);
+const contactsForm = new FormContacts(
+    document.getElementById('contacts') as HTMLTemplateElement, 
+    events
+);
+const successOrder = new SuccessOrder(
+    document.getElementById('success') as HTMLTemplateElement,
+    events
+);
 
 // Инициализация API
 const api: ILarekApi = new LarekApi(API_URL, settings);
@@ -177,16 +173,9 @@ events.on(AppEvents.ORDER_VALIDITY_CHANGED, (isValid: boolean) => {
 
 // Обработчик отправки формы оплаты
 events.on(AppEvents.ORDER_SUBMIT, () => {
-    if (contactsFormElementQuery) {
-        if (!contactsForm) {
-            contactsForm = new FormContacts(contactsFormElementQuery, events);
-        } else {
-            contactsForm.container = contactsFormElementQuery;
-            contactsForm.clear();
-        }
-        contactsForm.setSubmitButtonState(orderData.isContactsFormValid);
-        modal.setContent(contactsFormElementQuery);
-    }
+    contactsForm.setValues(orderData.contactsInfo.email, orderData.contactsInfo.phone);
+    contactsForm.setSubmitButtonState(orderData.isContactsFormValid);
+    modal.setContent(contactsForm.container);
 });
 
 // Обработчик изменения email
@@ -225,38 +214,26 @@ events.on(AppEvents.CONTACTS_SUBMIT, () => {
 events.on(AppEvents.ORDER_SUCCESS, (result: IOrderResult) => {
     orderData.clearBasket();
     orderData.clearDataForms();
-    if (!successTemplate) return;
-    if (!successOrder) {
-        successOrder = new SuccessOrder(successContent, events);
-    }
     successOrder.total = result.total;
-    modal.setContent(successContent);
+    modal.setContent(successOrder.render(result));
     modal.open();
 });
 
 // Обработчик закрытия окна успеха
 events.on(AppEvents.SUCCESS_CLOSE, () => {
     modal.close();
-    paymentForm = null;
-    contactsForm = null;
-    successOrder = null;
+    paymentForm.clear();
+    contactsForm.clear()
 });
 
 // Обработчик отправки корзины
 events.on(AppEvents.BASKET_SUBMIT, () => {
-    if (orderData.basket.length === 0) {
-        console.log('Корзина пуста');
-        return;
-    }
+    if (orderData.basket.length === 0) return;
     orderData.validateOrder();
-    if (!paymentForm) {
-        paymentForm = new FormPayments(formElement, events);
-    } else {
-        paymentForm.clear();
-        paymentForm.setSubmitButtonState(orderData.isOrderFormValid);
-        modal.setContent(formElement);
-        modal.open();
-    }
+    paymentForm.setValues(orderData.paymentInfo.payment, orderData.paymentInfo.address);
+    paymentForm.setSubmitButtonState(orderData.isOrderFormValid);
+    modal.setContent(paymentForm.container);
+    modal.open();
 });
 
 // Обработчик открытия модального окна

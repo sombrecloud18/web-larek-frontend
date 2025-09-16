@@ -1,3 +1,4 @@
+// SuccessOrder.ts
 import { ensureElement } from "../../utils/utils";
 import { AppEvents, ISuccessOrder } from "../../types";
 import { Component } from "../base/components";
@@ -8,12 +9,13 @@ export class SuccessOrder extends Component<ISuccessOrder> {
     protected _closeButton: HTMLButtonElement;
     protected events: IEvents;
 
-    constructor(container: HTMLElement, events: IEvents) {
-        super(container);
+    constructor(template: HTMLTemplateElement, events: IEvents) {
+        const content = (template.content.cloneNode(true) as HTMLElement).firstElementChild as HTMLElement;
+        super(content);
         this.events = events;
         
-        this._totalElement = ensureElement<HTMLElement>('.order-success__description', container);
-        this._closeButton = ensureElement<HTMLButtonElement>('.order-success__close', container);
+        this._totalElement = ensureElement<HTMLElement>('.order-success__description', this.container);
+        this._closeButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
         
         this._closeButton.addEventListener('click', () => {
             this.events.emit(AppEvents.SUCCESS_CLOSE);
@@ -22,10 +24,6 @@ export class SuccessOrder extends Component<ISuccessOrder> {
 
     set total(value: number) {
         this._totalElement.textContent = `Списано ${value} синапсов`;
-    }
-
-    getContainer(): HTMLElement {
-        return this.container;
     }
 
     render(data: ISuccessOrder): HTMLElement {
