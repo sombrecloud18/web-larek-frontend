@@ -53,27 +53,17 @@ const successOrder = new SuccessOrder(
 const api: ILarekApi = new LarekApi(API_URL, settings);
 
 // Рендер содержимого корзины
-function renderBasketList(items: TBasketItem[]): string {
-    if (items.length === 0) {
-        return '<p style="color: grey">Корзина пуста</p>';
-    }
-    
+function renderBasketList(items: TBasketItem[]): HTMLElement[] {
     const template = document.getElementById('card-basket') as HTMLTemplateElement;
-    if (!template) return '';
-    
-    let html = '';
-    
-    items.forEach((item, index) => {
+    if (!template) return [];
+
+    return items.map((item, index) => {
         const basketItemElement = template.content.cloneNode(true) as DocumentFragment;
         const basketItemContainer = basketItemElement.firstElementChild as HTMLElement;
         
-        const basketItem = new BasketItem(basketItemContainer);
-        basketItem.render({...item, index});
-        
-        html += basketItemContainer.outerHTML;
+        const basketItem = new BasketItem(basketItemContainer, events);
+        return basketItem.render({ ...item, index });
     });
-    
-    return html;
 }
 
 // Обработчик для создания карточек продуктов
@@ -109,10 +99,10 @@ events.on(AppEvents.BASKET_OPEN, () => {
 // Обработчик изменения корзины - ОБНОВЛЕНИЕ ДАННЫХ
 events.on(AppEvents.BASKET_CHANGED, (items: TBasketItem[]) => {
     const total = orderData.getTotal();
-    const basketListHTML = renderBasketList(items);
+    const basketList = renderBasketList(items);
     page.updateBasketCounter(items.length);
     basket.setOrderButtonState(items.length > 0);
-    basket.setBasketList(basketListHTML);
+    basket.setBasketList(basketList);
     basket.updateTotal(total);
     if (modal.isOpen() && items.length === 0) {
         modal.close();
